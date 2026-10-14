@@ -1,86 +1,108 @@
 import { useEffect, useState } from "react";
 import { AddTodoForm } from "./components/AddTodoForm";
 import { TodoList } from "./components/TodoList";
-import { getTodos, addTodo, updateTodoStatus, deleteTodo } from "./api";
+import { addTodo, deleteTodo, fetchTodos, updateTodoDone } from "./api";
 import type { Todo } from "./types";
+import "./App.css";
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadTodos() {
+    let isMounted = true;
+
+    const loadTodos = async () => {
       try {
-        const data = await getTodos();
-        setTodos(data);
-      } catch {
-        setError("Не удалось загрузить задачи. Попробуйте обновить страницу.");
+        setIsLoading(true);
+        setError(null);
+
+        const data = await fetchTodos();
+
+        if (isMounted) {
+          setTodos(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(
+            err instanceof Error ? err.message : "Не удалось загрузить задачи"
+          );
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    }
+    };
 
     void loadTodos();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  async function handleAddTodo(title: string): Promise<boolean> {
+  const handleAdd = async (title: string) => {
     try {
+      setError(null);
+
       const newTodo = await addTodo(title);
-      setTodos((currentTodos) => [newTodo, ...currentTodos]);
-      setError(null);
-      return true;
-    } catch {
-      setError("Не удалось добавить задачу.");
-      return false;
-    }
-  }
 
-  async function handleToggleTodo(id: string, isDone: boolean): Promise<void> {
-    try {
-      const updatedTodo = await updateTodoStatus(id, isDone);
-
-      setTodos((currentTodos) =>
-        currentTodos.map((todo) => (todo.id === id ? updatedTodo : todo))
+      setTodos((prev) => [...prev, newTodo]);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Не удалось добавить задачу"
       );
-
-      setError(null);
-    } catch {
-      setError("Не удалось изменить статус задачи.");
     }
-  }
+  };
 
-  async function handleDeleteTodo(id: string): Promise<void> {
+  const handleToggle = async (id: string, isDone: boolean) => {
     try {
+      setError(null);
+
+      const updatedTodo = await updateTodoDone(id, isDone);
+
+      setTodos((prev) =>
+        prev.map((todo) => (todo.id === id ? updatedTodo : todo))
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Не удалось обновить задачу"
+      );
+    }
+  };
+
+  console.log("URL:", import.meta.env.VITE_SUPABASE_URL);
+  console.log("key length:", import.meta.env.VITE_SUPABASE_ANON_KEY?.length);
+  const handleDelete = async (id: string) => {
+    try {
+      setError(null);
+
       await deleteTodo(id);
 
-      setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== id));
-
-      setError(null);
-    } catch {
-      setError("Не удалось удалить задачу.");
+      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Не удалось удалить задачу"
+      );
     }
-  }
+  };
 
   return (
     <main className="app">
-      <h1>Мои задачи</h1>
+      <h1>Todo</h1>
 
-      <AddTodoForm onAdd={handleAddTodo} />
+      <AddTodoForm onAdd={handleAdd} />
 
-      {error && (
-        <p role="alert" className="error-message">
-          {error}
-        </p>
-      )}
+      {isLoading && <p>Загрузка…</p>}
+      {error && <p className="error">Ошибка: {error}</p>}
 
-      {isLoading ? (
-        <p>Загрузка…</p>
-      ) : (
+      {!isLoading && (
         <TodoList
           todos={todos}
-          onToggle={handleToggleTodo}
-          onDelete={handleDeleteTodo}
+          onToggle={handleToggle}
+          onDelete={handleDelete}
         />
       )}
     </main>

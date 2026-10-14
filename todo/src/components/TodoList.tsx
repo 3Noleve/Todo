@@ -9,7 +9,7 @@ type TodoListProps = {
 
 export function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
   if (todos.length === 0) {
-    return <p className="empty-message">Пока нет задач. Добавь первую!</p>;
+    return <p className="empty">Задач пока нет</p>;
   }
 
   return (

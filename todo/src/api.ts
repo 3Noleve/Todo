@@ -1,55 +1,75 @@
 import { supabase } from "./supabaseClient";
 import type { Todo } from "./types";
 
-export async function getTodos(): Promise<Todo[]> {
-  const { data, error } = await supabase
-    .from("todos")
-    .select("*")
-    .order("created_at", { ascending: false });
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Неизвестная ошибка Supabase";
+}
 
-  if (error) {
-    throw error;
+export async function fetchTodos(): Promise<Todo[]> {
+  try {
+    const { data, error } = await supabase
+      .from("todos")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data ?? [];
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
   }
-
-  return data;
 }
 
 export async function addTodo(title: string): Promise<Todo> {
-  const { data, error } = await supabase
-    .from("todos")
-    .insert({ title })
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("todos")
+      .insert({ title, is_done: false })
+      .select()
+      .single();
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
   }
-
-  return data;
 }
 
-export async function updateTodoStatus(
+export async function updateTodoDone(
   id: string,
   isDone: boolean
 ): Promise<Todo> {
-  const { data, error } = await supabase
-    .from("todos")
-    .update({ is_done: isDone })
-    .eq("id", id)
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("todos")
+      .update({ is_done: isDone })
+      .eq("id", id)
+      .select()
+      .single();
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
   }
-
-  return data;
 }
 
 export async function deleteTodo(id: string): Promise<void> {
-  const { error } = await supabase.from("todos").delete().eq("id", id);
+  try {
+    const { error } = await supabase.from("todos").delete().eq("id", id);
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
   }
 }

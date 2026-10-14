@@ -8,26 +8,17 @@ type TodoItemProps = {
 
 export function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
   return (
-    <li className={`todo-item ${todo.is_done ? "completed" : ""}`}>
-      <label className="todo-label">
+    <li className={todo.is_done ? "todo-item done" : "todo-item"}>
+      <label>
         <input
           type="checkbox"
           checked={todo.is_done}
-          onChange={(event) => {
-            void onToggle(todo.id, event.target.checked);
-          }}
+          onChange={(event) => void onToggle(todo.id, event.target.checked)}
         />
         <span>{todo.title}</span>
       </label>
 
-      <button
-        type="button"
-        className="delete-button"
-        onClick={() => {
-          void onDelete(todo.id);
-        }}
-        aria-label={`Удалить задачу: ${todo.title}`}
-      >
+      <button type="button" onClick={() => void onDelete(todo.id)}>
         Удалить
       </button>
     </li>
