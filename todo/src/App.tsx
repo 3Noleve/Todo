@@ -73,8 +73,6 @@ function App() {
     }
   };
 
-  console.log("URL:", import.meta.env.VITE_SUPABASE_URL);
-  console.log("key length:", import.meta.env.VITE_SUPABASE_ANON_KEY?.length);
   const handleDelete = async (id: string) => {
     try {
       setError(null);
