@@ -19,8 +19,8 @@
 ### 1. Клонировать репозиторий
 
 ```bash
-git clone https://github.com/ВАШ_ЛОГИН/todo-supabase.git
-cd todo-supabase
+git clone https://github.com/ВАШ_ЛОГИН/Todo.git
+cd todo
 ```
 
 ### 2. Установить зависимости

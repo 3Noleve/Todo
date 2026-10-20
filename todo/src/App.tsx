@@ -36,7 +36,7 @@ function App() {
       }
     };
 
-    void loadTodos();
+    loadTodos();
 
     return () => {
       isMounted = false;

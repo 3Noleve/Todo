@@ -13,12 +13,12 @@ export function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
         <input
           type="checkbox"
           checked={todo.is_done}
-          onChange={(event) => void onToggle(todo.id, event.target.checked)}
+          onChange={(event) => onToggle(todo.id, event.target.checked)}
         />
         <span>{todo.title}</span>
       </label>
 
-      <button type="button" onClick={() => void onDelete(todo.id)}>
+      <button type="button" onClick={() => onDelete(todo.id)}>
         Удалить
       </button>
     </li>
